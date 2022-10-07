@@ -84,29 +84,32 @@ def k_vector_field(D, S):
 
 S = 10.
 
-fig, ax = plt.subplots(1,4, figsize=(40,6.5))
+std_list = [0.1, 0.01]
 
-D_vals = [2,3,8,13]
+for std in std_list:
+    fig, ax = plt.subplots(1,4, figsize=(40,6.5))
 
-p_init_array = get_init_k(100)
+    D_vals = [2,3,8,13]
 
-for i, D in enumerate(D_vals):
+    p_init_array = get_init_k(100, s=std)
 
-    ax[i].set_ylim([0,10])
-    ax[i].set_xlim([0,10])
+    for i, D in enumerate(D_vals):
 
-    for p_init in p_init_array:
-        k_traj = k_trajectory(D, S, p_init)
-        ax[i].plot(k_traj[0], k_traj[1],'k')
+        ax[i].set_ylim([0,10])
+        ax[i].set_xlim([0,10])
 
-    dkx, dky = k_vector_field(D, S)
+        for p_init in p_init_array:
+            k_traj = k_trajectory(D, S, p_init)
+            ax[i].plot(k_traj[0], k_traj[1],'k')
 
-    ax[i].plot(kx, S-kx, 'b-')
-    ax[i].streamplot(KX,KY, dkx, dky, density=1.0, linewidth=None, color='#A23BEC')
-    # ax[i].quiver(KX,KY, dkx, dky, linewidth=None, color='#A23BEC')
-    ax[i].set_ylabel(r'$K_{2\alpha}$')
-    ax[i].set_xlabel(r'$K_{1\alpha}$')
-    ax[i].set_title('$D={}$'.format(D))
+        dkx, dky = k_vector_field(D, S)
+
+        ax[i].plot(kx, S-kx, 'b-')
+        ax[i].streamplot(KX,KY, dkx, dky, density=1.0, linewidth=None, color='#A23BEC')
+        # ax[i].quiver(KX,KY, dkx, dky, linewidth=None, color='#A23BEC')
+        ax[i].set_ylabel(r'$K_{2\alpha}$')
+        ax[i].set_xlabel(r'$K_{1\alpha}$')
+        ax[i].set_title('$D={}$'.format(D))
 
 plt.show()
 
