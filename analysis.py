@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 import torch
 import os
 
@@ -69,19 +70,6 @@ class MPNAnalysis (object):
 
         return k
 
-        # omega = self.mcn.omega()
-
-        # with torch.no_grad():
-        #     omega_hat = []
-        #     for om in omega:
-        #         om_hat = om.mm(self.V.T)
-        #         om_hat = self.U.T.mm(om_hat)
-
-        #         omega_hat.append(om_hat)
-
-        # return omega_hat
-
-
     def train_mcn(self, timesteps=1000, lr=0.01):
 
         loss = torch.nn.MSELoss(reduction='sum')
@@ -98,7 +86,7 @@ class MPNAnalysis (object):
             loss_val = loss(output, self.Y)
 
             loss_history.append(loss_val.detach().numpy())
-            omega_history.append(mcn.omega())
+            omega_history.append(self.mcn.omega())
 
             loss_val.backward()
             optimizer.step()
@@ -119,14 +107,12 @@ class MPNAnalysis (object):
 
         return loss_history, K_history
 
-    def plot_K(self, savedir='', labels=None, savename=None, savelabel=''):
+    def plot_K(self, ax, savedir='', labels=None, savename=None, savelabel=''):
 
         if self.K_history is None:
             raise Exception("MultipathwayNet must be trained before visualization.")
 
         num_K = len(self.K_history)
-
-        fig, ax = plt.subplots(1,num_K, figsize=(5,5))
 
         K_list = [pathway[-1] for pathway in self.K_history]
 
@@ -137,24 +123,13 @@ class MPNAnalysis (object):
             labels = [i for i in range(len(K_list))]
 
         for i, K in enumerate(K_list):
-            im = ax[i].imshow(K, vmin=min_val, vmax=max_val, cmap='bwr')
+            im = ax[i].imshow(K, vmin=min_val, vmax=max_val, cmap='cividis')  # 'inferno'
             ax[i].set_title(r'$\bf K_{}$'.format(labels[i]), fontsize=20)
             ax[i].axis('off')
 
-        cb_ax = fig.add_axes([0.94,.2,.04,.6])
-        cbar=fig.colorbar(im,orientation='vertical',cax=cb_ax)
-        cbar.ax.tick_params(labelsize=15) 
+        plt.colorbar(im, ax=ax, shrink=0.6)
 
-        if savename is None:
-            savename = 'final_K'
-        savename = savename + '.pdf'
-        if len(savelabel)>0:
-            savename = savelabel+'_'+savename
-        savepath = os.path.join(savedir, savename)
-        
-        fig.savefig(savepath, bbox_inches='tight')
-
-    def plot_K_history(self, savename=None, D='unknown', savelabel=''):
+    def plot_K_history(self, ax, savename=None, D='unknown', savelabel=''):
 
         if self.K_history is None:
             raise Exception("MultipathwayNet must be trained before visualization.")
@@ -162,8 +137,6 @@ class MPNAnalysis (object):
         num_pathways = len(self.K_history)
         timesteps = len(self.K_history[0])
 
-        fig = plt.figure(figsize=(8,5))
-        ax = plt.axes(projection='3d')
         for i in range(min(self.mcn.input_dim, self.mcn.output_dim)):
         
             z1 = np.array([K[i,i] for K in self.K_history[0]])
@@ -184,54 +157,68 @@ class MPNAnalysis (object):
         ax.set_xlabel(r'dimension $\alpha$', fontsize=15)
         ax.set_ylabel('epoch', fontsize=15)
         ax.set_zlabel(r'$K_{a,b\alpha}$', fontsize=15)
-        plt.legend(fontsize=17, loc='upper left')
-        # plt.title(r'$N_w=%d$'%num_pathways, fontsize=20)
-        fig.suptitle('$D={}$'.format(D))
-        if len(savelabel)>0:
-            savename = savelabel+'_history.pdf'
-        else:
-            savename = 'history.pdf'
-        fig.savefig(savename)
+        ax.legend(fontsize=17, loc='upper left')
+
+        ax.set_box_aspect((2.25,1.75,1))
 
 
 if __name__=='__main__':
 
     import argparse
 
+    torch.manual_seed(345345)
+
+    plt.rc('font', size=20)
+    plt.rcParams['figure.constrained_layout.use'] = True
+    import matplotlib
+    matplotlib.rcParams["mathtext.fontset"] = 'cm'
+    
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--depth', type=int)
-    parser.add_argument('--timesteps', type=int, default=10000)
-    parser.add_argument('--nonlinearity', type=str, default='relu')
+    # parser.add_argument('--timesteps', type=int, default=10000)
+    # parser.add_argument('--nonlinearity', type=str, default='relu')
 
     args = parser.parse_args()
 
     nonlin = None
-    if args.nonlinearity=='relu':
-        nonlin = torch.nn.ReLU()
-    if args.nonlinearity=='tanh':
-        nonlin = torch.nn.Tanh()
+    # if args.nonlinearity=='relu':
+    #     nonlin = torch.nn.ReLU()
+    # if args.nonlinearity=='tanh':
+    #     nonlin = torch.nn.Tanh()
 
-    depth = args.depth
-    timesteps = args.timesteps
+    # timesteps = args.timesteps
 
-    savelabel = '{}_{}'.format(args.nonlinearity, depth)
+    depth_list = [2,3,4,7]
 
-    mcn = MultipathwayNet(8,15, depth=depth, num_pathways=2, width=1000, bias=False, nonlinearity=nonlin)
+    fig_train, ax_train = plt.subplots(1,len(depth_list), figsize=(25,8))
+    ax_train[0].set_ylabel('training error')
+    
+    fig_history = plt.figure(figsize=(24,10))
+    gs = gridspec.GridSpec(2, 6,width_ratios=[2.2,1,1,2.2,1,1],figure=fig_history)
 
-    mpna = MPNAnalysis(mcn, Y=Y_default)
+    timestep_list = [1000, 1000, 1400, 10000]
 
-    mpna.train_mcn(timesteps=timesteps, lr=0.01)
+    for di, depth in enumerate(depth_list):
 
-    fig, ax = plt.subplots()
-    ax.plot(mpna.loss_history)
-    fig.savefig(savelabel+'_train_loss.pdf')
+        ax3d = fig_history.add_subplot(gs[di*3], projection='3d')
+        ax2 = fig_history.add_subplot(gs[di*3 +1])
+        ax3 = fig_history.add_subplot(gs[di*3 +2])
 
-    if len(mpna.K_history)>1:
-        mpna.plot_K(labels=['a', 'b'], savelabel=savelabel)
+        mcn = MultipathwayNet(8,15, depth=depth, num_pathways=2, width=1000, bias=False, nonlinearity=nonlin)
+        mpna = MPNAnalysis(mcn, Y=Y_default)
+        mpna.train_mcn(timesteps=timestep_list[di], lr=0.01)
 
-    if len(mpna.K_history)==2:
-        mpna.plot_K_history(D=depth, savelabel=savelabel)
+        ax_train[di].plot(mpna.loss_history)
+        ax_train[di].set_xlabel('epoch')
+        ax_train[di].set_title("$D={}$".format(depth))
+
+        ax3d.set_title("$D=2$")
+        mpna.plot_K([ax2,ax3], labels=['a', 'b'])
+        mpna.plot_K_history(ax3d, D=depth)
+
+    fig_train.suptitle("Training loss")
+    fig_train.savefig('train_loss.pdf')
+    fig_history.savefig('test.pdf')
 
     plt.show()
 
