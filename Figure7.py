@@ -12,14 +12,14 @@ if __name__=='__main__':
 
     import argparse
 
-    torch.manual_seed(576)  
+    torch.manual_seed(87567467)  
     # a: 539394
     # b: 2435345345
-    # c: 87567467
+    # c: 87567467   ***
     # d: 67876
     # e: 34534
     # f: 765 didn't converge
-    # g: 576
+    # g: 576  wrong
 
     plt.rc('font', size=20)
     plt.rcParams['figure.constrained_layout.use'] = True
@@ -40,7 +40,7 @@ if __name__=='__main__':
     fig_history = plt.figure(figsize=(24,10))
     gs = gridspec.GridSpec(2, 6,width_ratios=[2.2,1,1,2.2,1,1],figure=fig_history)
 
-    timestep_list = [10000, 10000, 10000, 20000]
+    timestep_list = [10000, 10000, 20000, 20000]
 
     min_val = 0.0
     max_val = 1.0

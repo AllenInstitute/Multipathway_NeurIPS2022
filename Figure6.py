@@ -58,7 +58,7 @@ if __name__=='__main__':
         ax_train[di].set_title("$D={}$".format(depth))
 
         ax3d.set_title("$D={}$".format(depth))
-        mpna.plot_K([ax2,ax3], labels=['a', 'b'])
+        # mpna.plot_K([ax2,ax3], labels=['a', 'b'])
         mpna.plot_K_history(ax3d, D=depth)
 
         mpna_list.append(mpna)
