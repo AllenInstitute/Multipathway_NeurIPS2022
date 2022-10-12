@@ -87,7 +87,7 @@ class MultipathwayNet (torch.nn.Module):
     def omega(self):
 
         with torch.no_grad():
-            x = torch.eye(self.input_dim)
+            x = torch.eye(self.input_dim).to(self.hidden_layers[0][0].weight.device)
             output = []
 
             for op_list in self.hidden_layers:
