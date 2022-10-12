@@ -71,7 +71,7 @@ def k_vector_field(D, S):
 S = 10.
 
 std_list = [0.1, 0.01]
-fig, ax = plt.subplots(2,4, figsize=(40,13))
+fig, ax = plt.subplots(2,4, figsize=(26,13))
 
 for si, std in enumerate(std_list):
     
@@ -96,5 +96,8 @@ for si, std in enumerate(std_list):
         ax[si,i].set_ylabel(r'$K_{2\alpha}$')
         ax[si,i].set_xlabel(r'$K_{1\alpha}$')
         ax[0,i].set_title('$D={}$'.format(D))
+
+fig.tight_layout()
+fig.savefig("Figure3.pdf")
 
 plt.show()
