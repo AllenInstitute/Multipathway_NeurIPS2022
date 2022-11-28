@@ -13,10 +13,6 @@ if __name__=='__main__':
     import argparse
 
     torch.manual_seed(576)
-    # a:  345345
-    # b:  576
-    # c:  87578
-    # d:  8763
 
     plt.rc('font', size=20)
     plt.rcParams['figure.constrained_layout.use'] = True
@@ -37,7 +33,6 @@ if __name__=='__main__':
     fig_history = plt.figure(figsize=(24,10))
     gs = gridspec.GridSpec(2, 6,width_ratios=[2.2,1,1,2.2,1,1],figure=fig_history)
 
-    # timestep_list = [1000, 1000, 1400, 10000]
     timestep_list = [1000, 10000, 10000, 20000]
 
     min_val = 0.0
@@ -58,7 +53,6 @@ if __name__=='__main__':
         ax_train[di].set_title("$D={}$".format(depth))
 
         ax3d.set_title("$D={}$".format(depth))
-        # mpna.plot_K([ax2,ax3], labels=['a', 'b'])
         mpna.plot_K_history(ax3d, D=depth)
 
         mpna_list.append(mpna)

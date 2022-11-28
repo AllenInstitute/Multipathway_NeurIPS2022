@@ -27,12 +27,6 @@ if __name__=='__main__':
 
     depth = 2
 
-    # fig_train, ax_train = plt.subplots(1,len(depth_list), figsize=(25,8))
-    # ax_train[0].set_ylabel('training error')
-    
-    # fig_history = plt.figure(figsize=(24,10))
-    # gs = gridspec.GridSpec(2, 6,width_ratios=[2.2,1,1,2.2,1,1],figure=fig_history)
-
     num_checkpoints = 10
     fig, ax = plt.subplots(1,num_checkpoints, figsize=(15,3))
 
@@ -41,11 +35,7 @@ if __name__=='__main__':
     mcn = MultipathwayNet(8,15, depth=depth, num_pathways=2, width=1000, bias=False, nonlinearity=nonlin)
     mpna = MPNAnalysis(mcn)
 
-    # K = mpna.K_history[0][-1].to("cpu")
     K = mpna.omega2K(mpna.mcn.omega()[0])
-    # ax[0].imshow(K, cmap='magma')
-    # ax[0].axis('off')
-    # ax[0].set_title('$t=0$')
 
     min_val = torch.min(K)
     max_val = torch.max(K)
@@ -63,16 +53,10 @@ if __name__=='__main__':
         min_val = min(min_val, torch.min(K))
         max_val = max(max_val, torch.max(K))
 
-        # ax[nc+1].imshow(K, cmap='magma')
-        # ax[nc+1].axis('off')
-        # ax[nc+1].set_title('$t={}$'.format(nc+1))
-
     for nc in range(num_checkpoints):
         im = ax[nc].imshow(K_list[nc], cmap='magma', vmin=min_val, vmax=max_val)
         ax[nc].axis('off')
         ax[nc].set_title('$t={}$'.format(nc))
-
-    # plt.colorbar(im, ax=ax)
 
     fig.tight_layout()
     fig.savefig('Figure4.pdf')
