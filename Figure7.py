@@ -12,7 +12,7 @@ if __name__=='__main__':
 
     import argparse
 
-    torch.manual_seed(87567467)  
+    torch.manual_seed(63535)  # 87567467)  
     # a: 539394
     # b: 2435345345
     # c: 87567467   ***
@@ -54,7 +54,7 @@ if __name__=='__main__':
         # ax3 = fig_history.add_subplot(gs[di*3 +2])
 
         mcn = MultipathwayNet(8,15, depth=depth, num_pathways=2, width=1000, bias=False, nonlinearity=nonlin)
-        mpna = MPNAnalysis(mcn, device="cpu")
+        mpna = MPNAnalysis(mcn) #, device="cpu")
         mpna.train_mcn(timesteps=timestep_list[di], lr=0.01)
 
         ax_train[di].plot(mpna.loss_history)
